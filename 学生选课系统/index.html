@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学生通识课选修系统</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+body {
+font-family: 'Microsoft YaHei', sans-serif;
+background: #f5f7fa;
+min-height: 100vh;
+padding: 30px;
+}
+.container {
+max-width: 1450px;
+margin: 0 auto;
+background: #fff;
+border-radius: 24px;
+box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+overflow: hidden;
+}
+.header {
+background: #4069e8;
+color: white;
+padding: 35px;
+text-align: center;
+position: relative;
+}
+.header h1 { font-size: 28px; margin-bottom: 10px; }
+.header p { font-size: 16px; opacity: 0.9; }
+.user-info {
+position: absolute;
+right: 30px;
+top: 30px;
+background: rgba(255,255,255,0.2);
+padding: 8px 15px;
+border-radius: 20px;
+font-size: 14px;
+display: flex;
+gap: 10px;
+}
+.logout-btn {
+background: #ff4d4f;
+padding: 4px 10px;
+border-radius: 6px;
+cursor: pointer;
+}
+.logout-btn:hover { background: #ff7875; }
+.main-content { display: flex; min-height: 650px; }
+.sidebar {
+width: 260px;
+background: #f7f8fa;
+border-right: 1px solid #ebeef5;
+padding: 25px 0;
+}
+.sidebar-title {
+padding: 0 25px 20px;
+font-size: 17px;
+font-weight: bold;
+border-bottom: 1px solid #eee;
+margin-bottom: 15px;
+}
+.menu-btn {
+width: 90%;
+margin: 6px auto;
+padding: 14px 20px;
+border: none;
+background: transparent;
+text-align: left;
+font-size: 15px;
+cursor: pointer;
+border-radius: 10px;
+color: #555;
+display: flex;
+gap: 10px;
+}
+.menu-btn.active {
+background: #e8f0ff;
+color: #4069e8;
+font-weight: 600;
+}
+.menu-btn:hover:not(.active) { background: #eef1f7; }
+.menu-btn.hidden { display: none; }
+.content { flex: 1; padding: 35px; background: #fff; }
+.content h2 {
+color: #222;
+margin-bottom: 25px;
+padding-bottom: 12px;
+border-bottom: 2px solid #f2f4f8;
+}
+.panel { display: none; }
+.panel.active-panel { display: block; }
+.form-group { margin-bottom: 22px; }
+label { display: block; margin-bottom: 9px; font-weight: 500; color: #333; }
+input, select {
+width: 100%;
+padding: 12px 15px;
+border: 1px solid #dcdfe6;
+border-radius: 8px;
+font-size: 15px;
+}
+input:focus, select:focus {
+outline: none;
+border-color: #4069e8;
+box-shadow: 0 0 0 3px #e8f0ff;
+}
+button {
+background: #4069e8;
+color: white;
+border: none;
+padding: 13px 32px;
+border-radius: 8px;
+cursor: pointer;
+font-size: 15px;
+}
+button:hover { background: #3056d1; }
+table {
+width: 100%;
+border-collapse: collapse;
+margin-top: 25px;
+border-radius: 10px;
+overflow: hidden;
+}
+th {
+background: #f7f8fa;
+color: #333;
+font-weight: 600;
+padding: 14px 16px;
+}
+td {
+padding: 14px 16px;
+text-align: center;
+border-bottom: 1px solid #f0f2f5;
+}
+tbody tr:hover { background: #f9fafc; }
+.btn-danger {
+background: #f56c6c;
+padding: 8px 16px;
+font-size: 13px;
+border-radius: 6px;
+cursor: pointer;
+color: white;
+border: none;
+}
+.btn-danger:hover { background: #e05252; }
+.btn-success {
+background: #67c23a;
+padding: 8px 16px;
+font-size: 13px;
+border-radius: 6px;
+cursor: pointer;
+color: white;
+border: none;
+}
+.btn-success:hover { background: #56ad2a; }
+.btn-warning {
+background: #e6a23c;
+padding: 8px 16px;
+font-size: 13px;
+border-radius: 6px;
+cursor: pointer;
+color: white;
+border: none;
+}
+.btn-warning:hover { background: #cf9236; }
+.login-container {
+max-width: 480px;
+margin: 60px auto;
+padding: 40px;
+background: white;
+border-radius: 20px;
+box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+.login-container h2 { text-align: center; margin-bottom: 30px; }
+.role-tabs {
+display: flex;
+gap: 10px;
+margin-bottom: 25px;
+}
+.role-tab {
+flex: 1;
+padding: 12px;
+text-align: center;
+background: #f5f7fa;
+border-radius: 8px;
+cursor: pointer;
+}
+.role-tab.active {
+background: #4069e8;
+color: white;
+}
+.login-tip {
+text-align: center;
+margin-top: 20px;
+padding-top: 15px;
+border-top: 1px solid #eee;
+color: #888;
+font-size: 13px;
+line-height: 1.8;
+}
+.credit-info {
+margin-top: 20px;
+padding: 15px;
+background: #f0f9ff;
+border-radius: 8px;
+border-left: 4px solid #4069e8;
+}
+.credit-complete { color: #67c23a; font-weight: bold; }
+.credit-incomplete { color: #f56c6c; font-weight: bold; }
+.loading { text-align: center; padding: 40px; color: #999; }
+</style>
+</head>
+<body>
+<div id="loginPage" class="login-container">
+<h2>🎓 通识课选修系统登录</h2>
+<div class="role-tabs">
+<div class="role-tab active" data-role="student">学生登录</div>
+<div class="role-tab" data-role="teacher">教师登录</div>
+<div class="role-tab" data-role="admin">管理员登录</div>
+</div>
+<form id="loginForm">
+<div class="form-group">
+<label>学号/工号 *</label>
+<input id="account" placeholder="请输入账号" required>
+</div>
+<div class="form-group" id="nameField">
+<label>姓名 *</label>
+<input id="name" placeholder="请输入真实姓名" required>
+</div>
+<div class="form-group">
+<label>密码 *</label>
+<input type="password" id="pwd" placeholder="请输入密码" required>
+</div>
+<button type="submit" style="width:100%">登录系统</button>
+</form>
+<div class="login-tip">
+📝 测试账号：<br>
+学生：0056 / 张三 / 123456 | 1208 / 李四 / 123456 | 2567 / 王五 / 123456<br>
+教师：t001 / 李老师 / 123456 | t002 / 王老师 / 123456<br>
+管理员：a001 / 123456（无需填写姓名）
+</div>
+</div>
+
+<div id="mainPage" class="container" style="display:none;">
+<div class="header">
+<h1>📚 学生通识课选修管理系统</h1>
+<p>选课要求：所选课程总学分 ≥ 7 学分</p>
+<div class="user-info">
+<span id="userShow"></span>
+<span class="logout-btn" onclick="logout()">退出登录</span>
+</div>
+</div>
+<div class="main-content">
+<div class="sidebar">
+<div class="sidebar-title">系统功能菜单</div>
+<button class="menu-btn active" onclick="showPanel('list', this)">📖 课程列表</button>
+<button class="menu-btn" id="selectOrAddBtn" onclick="handleSelectOrAdd(this)">✅ 我要选课</button>
+<button class="menu-btn" id="myCoursesBtn" onclick="showPanel('my', this)">📚 我的课程</button>
+<button class="menu-btn" id="unselectBtn" onclick="showPanel('unselect', this)">👥 未选课学生</button>
+</div>
+<div class="content">
+<!-- 全部课程 -->
+<div id="listPanel" class="panel active-panel">
+<h2>📖 全部课程</h2>
+<div style="overflow-x: auto;">
+<table>
+<thead><tr><th>课程编号</th><th>课程名称</th><th>学分</th><th>学期</th><th>任课教师</th><th id="adminDelHeader" style="display:none;">操作</th></tr></thead>
+<tbody id="courseList"><tr><td colspan="5" class="loading">加载中...</td></tr></tbody>
+</table>
+</div>
+</div>
+<!-- 选课面板（学生端） -->
+<div id="selectPanel" class="panel">
+<h2>✅ 在线选课</h2>
+<div style="overflow-x: auto;">
+<table>
+<thead><tr><th>编号</th><th>名称</th><th>学分</th><th>学期</th><th>教师</th><th>操作</th></tr></thead>
+<tbody id="selectList"><tr><td colspan="6" class="loading">加载中...</td></tr></tbody>
+</table>
+</div>
+</div>
+<!-- 添加课程面板（教师/管理员端） -->
+<div id="addPanel" class="panel">
+<h2>➕ 添加新课程</h2>
+<div style="max-width: 500px;">
+<div class="form-group"><label>课程编号 *</label><input id="cid" placeholder="例如：TS007"></div>
+<div class="form-group"><label>课程名称 *</label><input id="cname" placeholder="例如：人工智能导论"></div>
+<div class="form-group"><label>学期 *</label><select id="sem"><option value="1">第1学期</option><option value="2">第2学期</option></select></div>
+<div class="form-group"><label>教师工号 *</label><input id="tid" placeholder="例如：t001"></div>
+<div class="form-group"><label>教师姓名 *</label><input id="tname" placeholder="例如：李老师"></div>
+<button onclick="addCourse()">提交添加</button>
+</div>
+</div>
+<!-- 我的课程面板（学生/教师端） -->
+<div id="myPanel" class="panel">
+<h2 id="myCoursesTitle">📚 我的已选课程</h2>
+<div style="overflow-x: auto;">
+<table>
+<thead><tr><th>编号</th><th>名称</th><th>学分</th><th>学期</th><th>任课教师</th><th id="actionHeader">状态</th></tr></thead>
+<tbody id="myList"><tr><td colspan="6" class="loading">加载中...</td></tr></tbody>
+</table>
+</div>
+<div id="creditInfo" class="credit-info"></div>
+</div>
+<!-- 未选课学生（教师/管理员端） -->
+<div id="unselectPanel" class="panel">
+<h2>👥 未选课学生名单</h2>
+<div style="overflow-x: auto;">
+<table>
+<thead><tr><th>学号</th><th>姓名</th><th>学院</th></tr></thead>
+<tbody id="unselectList"><tr><td colspan="3" class="loading">加载中...</td></tr></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const BACKEND_URL = 'http://127.0.0.1:5000';
+let role = "student";
+let user = "";
+
+function updateNameField() {
+const nameField = document.getElementById('nameField');
+const nameInput = document.getElementById('name');
+if (role === 'admin') {
+nameField.style.display = 'none';
+nameInput.required = false;
+nameInput.value = '';
+} else {
+nameField.style.display = 'block';
+nameInput.required = true;
+nameInput.placeholder = role === 'student' ? '请输入真实姓名' : '请输入教师姓名';
+}
+}
+
+// 角色切换
+document.querySelectorAll('.role-tab').forEach(tab => {
+tab.addEventListener('click', () => {
+document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+tab.classList.add('active');
+role = tab.dataset.role;
+updateNameField();
+});
+});
+updateNameField();
+
+// 登录
+document.getElementById('loginForm').addEventListener('submit', async e => {
+e.preventDefault();
+let account = document.getElementById('account').value.trim();
+let name = document.getElementById('name').value.trim();
+let pwd = document.getElementById('pwd').value;
+if (!account || !pwd) { alert("请输入账号和密码！"); return; }
+if (role !== 'admin' && !name) { alert("请输入姓名！"); return; }
+user = account;
+let url = BACKEND_URL + { student: "/api/student/login", teacher: "/api/teacher/login", admin: "/api/admin/login" }[role];
+let bodyData = { [role === "student" ? "sid" : role === "teacher" ? "tid" : "aid"]: account, pwd: pwd };
+if (role === "student") bodyData.sname = name;
+else if (role === "teacher") bodyData.tname = name;
+try {
+let response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bodyData) });
+let res = await response.json();
+if (!res.success) { alert(res.message || "账号或密码错误！"); return; }
+document.getElementById('loginPage').style.display = 'none';
+document.getElementById('mainPage').style.display = 'block';
+let roleName = role === 'student' ? '学生' : (role === 'teacher' ? '教师' : '管理员');
+document.getElementById('userShow').innerHTML = role === 'admin' ? `${account}（${roleName}）` : `${name}（${account} / ${roleName}）`;
+const selectOrAddBtn = document.getElementById('selectOrAddBtn');
+const myCoursesBtn = document.getElementById('myCoursesBtn');
+const unselectBtn = document.getElementById('unselectBtn');
+const myCoursesTitle = document.getElementById('myCoursesTitle');
+const actionHeader = document.getElementById('actionHeader');
+const adminDelHeader = document.getElementById('adminDelHeader');
+if (role === "student") {
+selectOrAddBtn.innerHTML = '✅ 我要选课';
+selectOrAddBtn.classList.remove('hidden');
+myCoursesBtn.classList.remove('hidden');
+unselectBtn.classList.add('hidden');
+myCoursesTitle.innerHTML = '📚 我的已选课程';
+if (actionHeader) actionHeader.innerHTML = '操作';
+if (adminDelHeader) adminDelHeader.style.display = 'none';
+} else if (role === "teacher") {
+selectOrAddBtn.innerHTML = '➕ 添加课程';
+selectOrAddBtn.classList.remove('hidden');
+myCoursesBtn.classList.remove('hidden');
+unselectBtn.classList.remove('hidden');
+myCoursesTitle.innerHTML = '📚 我任教的课程';
+if (actionHeader) actionHeader.innerHTML = '删除';
+if (adminDelHeader) adminDelHeader.style.display = 'none';
+} else {
+selectOrAddBtn.innerHTML = '➕ 添加课程';
+selectOrAddBtn.classList.remove('hidden');
+myCoursesBtn.classList.add('hidden');
+unselectBtn.classList.remove('hidden');
+myCoursesTitle.innerHTML = '📚 课程管理';
+if (actionHeader) actionHeader.innerHTML = '操作';
+if (adminDelHeader) adminDelHeader.style.display = 'table-cell';
+}
+await loadCourses();
+if (role !== 'admin') {
+await loadMyCourses();
+}
+} catch (e) {
+alert("无法连接到后端服务！\n请确保：\n1. Python后端已启动（运行 python app.py）\n2. 后端运行在 http://127.0.0.1:5000");
+}
+});
+
+function logout() { if (confirm("确定要退出吗？")) location.reload(); }
+
+function handleSelectOrAdd(btn) {
+showPanel(role === "student" ? 'select' : 'add', btn);
+}
+
+function showPanel(name, btnElement) {
+document.querySelectorAll('.panel').forEach(p => p.classList.remove('active-panel'));
+document.getElementById(name + 'Panel').classList.add('active-panel');
+document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+if (btnElement) btnElement.classList.add('active');
+if (name === "my") loadMyCourses();
+else if (name === "unselect") loadUnselect();
+else if (name === "list" || name === "select") loadCourses();
+}
+
+async function loadCourses() {
+try {
+let res = await fetch(BACKEND_URL + "/api/courses");
+let list = await res.json();
+let html = '', selHtml = '';
+list.forEach(c => {
+html += `<tr><td>${c.cid}</td><td>${c.name}</td><td>${c.credit}</td><td>第${c.semester}学期</td><td>${c.teacher_name}</td>`;
+if (role === 'admin') {
+html += `<td><button class="btn-danger" onclick="adminDeleteCourse('${c.cid}')">删除</button></td>`;
+} else {
+html += `<td></td>`;
+}
+html += `</tr>`;
+selHtml += `<tr><td>${c.cid}</td><td>${c.name}</td><td>${c.credit}</td><td>第${c.semester}学期</td><td>${c.teacher_name}</td><td><button class="btn-success" onclick="selectCourse('${c.cid}')">选课</button></td></tr>`;
+});
+document.getElementById('courseList').innerHTML = html || '<tr><td colspan="6" class="loading">暂无课程</td></tr>';
+document.getElementById('selectList').innerHTML = selHtml || '<tr><td colspan="6" class="loading">暂无课程</td></tr>';
+} catch(e) { console.log(e); }
+}
+
+async function loadMyCourses() {
+try {
+let url;
+if (role === "student") {
+url = `/api/my_selected/${user}`;
+} else if (role === "teacher") {
+url = `/api/teacher/courses/${user}`;
+} else {
+return;
+}
+let res = await fetch(BACKEND_URL + url);
+let list = await res.json();
+let html = '', total = 0;
+list.forEach(c => {
+if (role === "student") total += c.credit;
+html += `<tr><td>${c.cid}</td><td>${c.name}</td><td>${c.credit}</td><td>第${c.semester}学期</td><td>${c.teacher}</td>`;
+if (role === "student") {
+html += `<td><button class="btn-warning" onclick="unselectCourse('${c.cid}')">退课</button></td>`;
+} else if (role === "teacher") {
+html += `<td><button class="btn-danger" onclick="deleteCourse('${c.cid}')">删除</button></td>`;
+} else {
+html += `<td>已选</td>`;
+}
+html += `</tr>`;
+});
+document.getElementById('myList').innerHTML = html || '<tr><td colspan="6" class="loading">暂无数据</td></tr>';
+if (role === "student") {
+let need = 7, remain = need - total;
+document.getElementById('creditInfo').innerHTML = `<strong>📊 选课统计：</strong><br>已选课程：${list.length}门<br>总学分：${total} 分<br>选课要求：至少 7 学分<br>${remain > 0 ? `<span class="credit-incomplete">⚠️ 还需选修 ${remain} 学分</span>` : '<span class="credit-complete">✅ 恭喜！已完成选课要求！</span>'}`;
+} else {
+document.getElementById('creditInfo').innerHTML = '';
+}
+} catch(e) { console.log(e); }
+}
+
+async function selectCourse(cid) {
+try {
+let res = await fetch(BACKEND_URL + "/api/select", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: user, cid }) });
+let data = await res.json();
+alert(data.message);
+if (data.ok) { await loadMyCourses(); await loadCourses(); }
+} catch(e) { alert("选课失败"); }
+}
+
+async function unselectCourse(cid) {
+if (!confirm(`确定要退选课程 ${cid} 吗？`)) return;
+try {
+let res = await fetch(BACKEND_URL + "/api/unselect", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: user, cid }) });
+let data = await res.json();
+alert(data.message);
+if (data.ok) { await loadMyCourses(); await loadCourses(); }
+} catch(e) { alert("退课失败"); }
+}
+
+async function deleteCourse(cid) {
+if (!confirm(`确定删除课程 ${cid} 吗？`)) return;
+try {
+let res = await fetch(BACKEND_URL + `/api/courses/${cid}`, { method: "DELETE" });
+let data = await res.json();
+alert(data.message);
+if (data.ok) { await loadMyCourses(); await loadCourses(); }
+} catch(e) { alert("删除失败"); }
+}
+
+async function adminDeleteCourse(cid) {
+if (!confirm(`【管理员操作】确定删除课程 ${cid} 吗？\n删除后该课程的所有选课记录也会被清除！`)) return;
+try {
+let res = await fetch(BACKEND_URL + `/api/courses/${cid}`, { method: "DELETE" });
+let data = await res.json();
+alert(data.message);
+if (data.ok) { await loadCourses(); if (role !== 'admin') await loadMyCourses(); }
+} catch(e) { alert("删除失败"); }
+}
+
+async function addCourse() {
+let cid = document.getElementById('cid').value.trim();
+let name = document.getElementById('cname').value.trim();
+let semester = document.getElementById('sem').value;
+let teacher_id = document.getElementById('tid').value.trim();
+let teacher_name = document.getElementById('tname').value.trim();
+if (!cid || !name || !teacher_id || !teacher_name) { alert("请填写所有字段！"); return; }
+try {
+let res = await fetch(BACKEND_URL + "/api/courses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cid, name, semester, teacher_id, teacher_name }) });
+let data = await res.json();
+alert(data.message);
+if (data.ok) {
+document.getElementById('cid').value = '';
+document.getElementById('cname').value = '';
+document.getElementById('tid').value = '';
+document.getElementById('tname').value = '';
+await loadCourses();
+if (role !== "admin") await loadMyCourses();
+}
+} catch(e) { alert("添加失败"); }
+}
+
+async function loadUnselect() {
+try {
+let res = await fetch(BACKEND_URL + "/api/unselected_students");
+let list = await res.json();
+let html = '';
+list.forEach(s => html += `<tr><td>${s.sid}</td><td>${s.sname}</td><td>${s.college || '未分配'}</td></tr>`);
+document.getElementById('unselectList').innerHTML = html || '<tr><td colspan="3" class="loading">所有学生都已选课</td></tr>';
+} catch(e) { console.log(e); }
+}
+</script>
+</body>
+</html>
+
